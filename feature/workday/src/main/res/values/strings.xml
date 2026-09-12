@@ -1,0 +1,4 @@
+<resources>
+    <string name="workday_empty_title">Sin jornada iniciada</string>
+    <string name="workday_empty_description">Aquí podrás importar la ruta del día, revisar el cierre y exportar el Excel. Estas funciones todavía no están disponibles.</string>
+</resources>

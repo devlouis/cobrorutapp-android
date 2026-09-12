@@ -1,6 +1,5 @@
-package com.pe.cobrorutapp.ui.theme
+package com.pe.cobrorutapp.core.designsystem.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

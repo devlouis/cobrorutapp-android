@@ -1,0 +1,4 @@
+<resources>
+    <string name="collection_empty_title">Sin clientes cargados</string>
+    <string name="collection_empty_description">Los clientes y sus deudas aparecerán al importar una jornada. Aún no se pueden registrar cobros ni gastos.</string>
+</resources>

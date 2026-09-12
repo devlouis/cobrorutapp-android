@@ -1,0 +1,4 @@
+<resources>
+    <string name="income_empty_title">Sin ingresos detectados</string>
+    <string name="income_empty_description">Aquí revisarás los ingresos pendientes de asociar. La captura de notificaciones todavía no está habilitada.</string>
+</resources>

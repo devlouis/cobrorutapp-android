@@ -24,3 +24,12 @@ dependencyResolutionManagement {
 
 rootProject.name = "cobrorutapp"
 include(":app")
+
+include(":core:domain")
+include(":core:data")
+include(":core:designsystem")
+include(":feature:workday")
+include(":feature:collection")
+include(":feature:income")
+include(":integration:notifications")
+include(":integration:excel")

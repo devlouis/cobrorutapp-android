@@ -1,4 +1,4 @@
-package com.pe.cobrorutapp.ui.theme
+package com.pe.cobrorutapp.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 

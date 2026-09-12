@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">cobrorutapp</string>
+    <string name="app_name">CobroRutApp</string>
+    <string name="destination_workday">Jornada</string>
+    <string name="destination_collection">Cobranza</string>
+    <string name="destination_income">Ingresos</string>
+    <string name="theme_system">Tema: sistema</string>
+    <string name="theme_light">Tema: claro</string>
+    <string name="theme_dark">Tema: oscuro</string>
+    <string name="preferences_error">No se pudo acceder a las preferencias. Vuelve a abrir la app para reintentar.</string>
 </resources>
