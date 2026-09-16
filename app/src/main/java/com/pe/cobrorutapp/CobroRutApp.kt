@@ -25,6 +25,7 @@ import com.pe.cobrorutapp.core.domain.preferences.ThemeMode
 import com.pe.cobrorutapp.feature.collection.CollectionScreen
 import com.pe.cobrorutapp.feature.income.IncomeScreen
 import com.pe.cobrorutapp.feature.workday.WorkdayScreen
+import com.pe.cobrorutapp.probe.NotificationProbeEntry
 
 private enum class Destination(val route: String, @param:StringRes val label: Int, val symbol: String) {
     WORKDAY("workday", R.string.destination_workday, "≡"),
@@ -85,7 +86,12 @@ fun CobroRutApp(state: AppUiState, onCycleTheme: () -> Unit) {
             NavHost(navController = navController, startDestination = Destination.WORKDAY.route) {
                 composable(Destination.WORKDAY.route) { WorkdayScreen() }
                 composable(Destination.COLLECTION.route) { CollectionScreen() }
-                composable(Destination.INCOME.route) { IncomeScreen() }
+                composable(Destination.INCOME.route) {
+                    Column {
+                        NotificationProbeEntry()
+                        IncomeScreen(Modifier.weight(1f))
+                    }
+                }
             }
         }
     }

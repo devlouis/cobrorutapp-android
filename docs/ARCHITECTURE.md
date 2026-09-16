@@ -70,3 +70,9 @@ El archivo Gradle raíz centraliza SDK y target Java de bibliotecas; sin build-l
 No existe `google-services.json`; la base compila sin plugins, SDK ni inicialización Firebase. Antes de incorporar Crashlytics: obtener configuración real autorizada, verificar `client_info.android_client_info.package_name == com.pe.cobrorutapp`, añadir plugins/BOM/SDK estables compatibles y realizar una prueba controlada de crash. No crear archivo falso ni proyecto remoto. Mantener Analytics fuera; no registrar datos de clientes, dinero o evidencias. [Guía oficial](https://firebase.google.com/docs/crashlytics/get-started?platform=android).
 
 No seleccionar biblioteca XLSX u OCR todavía. No añadir red, trabajo en segundo plano ni permisos sin una función concreta. En fase 1 documentar viabilidad en dispositivos reales y round-trip del Excel antes de implementar funcionalidades productivas.
+
+## POC de notificaciones — fase 1 (debug)
+
+El usuario autorizó una prueba técnica de captura de Yape/Interbank. El contrato de diagnóstico vive en domain; el servicio y filtro de notificaciones, en el source set debug de integration:notifications; el repositorio de muestras descartables, en core:data/debug; pantalla, ViewModel y ensamblado Hilt, en app/debug. La entrada release es vacía y no declara el servicio. No hay dependencias data → integration ni entre features. Hilt/KSP se aplica también en integration:notifications para su servicio debug.
+
+Se usa un archivo atómico acotado fuera de backup para diagnóstico, no para pagos/jornadas. Room sigue pendiente de fase 2 como fuente de verdad de cobranza. No convertir las muestras de esta POC en registros financieros. Diseño, límites, filtros provisionales y validación manual en [NOTIFICATION_POC](NOTIFICATION_POC.md).

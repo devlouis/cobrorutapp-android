@@ -50,3 +50,9 @@ La cuenta Git de este proyecto es devlouis; autenticación local aislada. No cam
 ## Continuar en otro chat o CLI
 
 > Continúa CobroRutApp. Lee AGENTS.md, docs/PRODUCT_CONTEXT.md, docs/ARCHITECTURE.md, docs/ROADMAP.md y docs/WORK_STATUS.md. Inspecciona Git y el código antes de editar. Retoma la fase en curso y completa únicamente su siguiente tarea pendiente. Si no hay fase en curso, resume el estado y propón la primera tarea de la siguiente fase antes de implementarla. Actualiza WORK_STATUS con cambios, validación real y siguiente paso. No asumas contexto de otros chats ni ejecutes push.
+
+## Fase 1: prueba de notificaciones (solo debug)
+
+Abre Ingresos → Prueba de notificaciones (debug). La pantalla explica el alcance antes de abrir el acceso especial de Android. Solo al iniciar una sesión temporal se retienen candidatos de ingreso de Yape/Plin de Interbank. No acredita pagos ni modifica saldos. Lee el [protocolo y limitaciones](docs/NOTIFICATION_POC.md). Plin fue validado manualmente en un Z2474 con Interbank 23.4; Yape y otros formatos continúan pendientes.
+
+Las reglas aún por decidir están en [BUSINESS_RULES_CHECKLIST](docs/BUSINESS_RULES_CHECKLIST.md). La distribución de pagos entre préstamos espera respuesta del cobrador.

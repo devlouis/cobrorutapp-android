@@ -1,0 +1,12 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <queries>
+        <package android:name="com.bcp.innovacxion.yapeapp" />
+        <package android:name="pe.com.interbank.mobilebanking" />
+    </queries>
+    <application>
+        <activity
+            android:name=".probe.NotificationProbeActivity"
+            android:exported="false"
+            android:label="Prueba de notificaciones" />
+    </application>
+</manifest>

@@ -4,6 +4,7 @@ plugins {
 
 android {
     namespace = "com.pe.cobrorutapp.core.data"
+    defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 }
 
 dependencies {
@@ -11,4 +12,6 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.core)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.runner)
 }
