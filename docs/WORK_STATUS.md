@@ -195,3 +195,7 @@ Validación final antes del commit local:
 - `git diff --check`: sin errores.
 
 El commit será local y no se ejecutará push. Fase 1 continúa con Yape, formatos alternativos de Interbank y el round-trip Excel pendientes.
+
+## Secuencia acordada para notificaciones
+
+El usuario indicó continuar avanzando con pruebas y comprobaciones de Plin a medida que existan nuevos escenarios o formatos. La matriz ejecutada en Z2474 queda como línea base comprobada, sin considerar cerrada toda compatibilidad futura de Interbank. Las pruebas equivalentes de Yape se realizarán después y permanecen pendientes; los resultados de Plin no se trasladan por suposición a Yape. Solo actualización documental, sin cambios de código ni pruebas nuevas; no ejecutar push.
