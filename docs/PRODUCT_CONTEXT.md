@@ -15,6 +15,8 @@ Primera versión local y sin conexión para las operaciones de cobranza. Sin bac
 5. Cobrador revisa cliente, deuda y monto, y confirma. Solo entonces se aplica el abono.
 6. Registra gastos, revisa pendientes/cierre y exporta el Excel actualizado para enviarlo al supervisor.
 
+Regla de jornada confirmada: cada día requiere una importación aceptada antes de poder iniciar la jornada. Si no existe archivo importado, la acción de inicio permanece bloqueada. Al terminar se debe generar el archivo Excel de cierre. Quedan por definir validación de fecha/ruta, reemplazo de archivo equivocado, pendientes que bloquean cierre, manejo de fallos de exportación, reapertura y reexportación.
+
 ## Invariantes para próximas fases
 
 Room será fuente de verdad de la jornada; Excel es entrada/salida. Partir del saldo importado y aplicar únicamente nuevos abonos para no descontar historial dos veces. Dinero con `Long` en céntimos y moneda explícita.
@@ -29,7 +31,7 @@ Captura independiente de pantallas/ViewModel. No prometer recepción infalible c
 
 ## Archivo de referencia y dudas
 
-`2SJL17ABRIL26.xlsx` no estaba en el repositorio al inspeccionarlo en fase 0; **no fue inspeccionado**. Según el contexto aportado, la hoja principal se llama Plan1 y contiene clientes, operaciones, cuotas, saldos, abonos por fecha, gastos y caja. Esto requiere validación contra el archivo real. Durante el cierre de fase 0 el usuario proporcionó el archivo en una ubicación local externa; se comprobó su existencia, no su contenido. Está disponible para un encargo de fase 1 y no se copió a Git.
+`2SJL17ABRIL26.xlsx` no estaba en el repositorio durante fase 0. El usuario lo proporcionó después en una ubicación externa y no se copió a Git. El 2026-09-24 se realizó una inspección estructural local y de solo lectura de `Plan1`, sin exponer valores personales: encabezados de nombre, DNI, fecha, venta, servicio, total, cuota, saldo y abono; 3,909 filas con nombre; 2,047 nombres normalizados distintos; 696 grupos repetidos; y solo 53 filas con DNI. `SALDO` y `ABONO` contienen numerosas fórmulas. Estos datos confirman que el nombre no sirve como clave estable y que debe validarse el round-trip antes de escribir el archivo. Detalle en [PAYMENT_MATCHING_POC](PAYMENT_MATCHING_POC.md).
 
 Pendientes: aplicación exacta de C/N/A y colores en el archivo; claves estables de filas/clientes/deudas; reglas de asignación a varias deudas; política de reimportación; cierre con pendientes; reversos y correcciones; alcance y retención de evidencias; recuperación/respaldo; parque Android y minSdk 26; contenido real de Yape y formatos alternativos de Interbank; conservación de fórmulas, formatos y otras hojas al exportar. No inventar decisiones de estas áreas.
 
@@ -68,3 +70,11 @@ Siguientes definiciones: aplicación de un pago a varios préstamos, pagos parci
 ## Seguimiento de definiciones
 
 El [checklist de reglas de negocio](BUSINESS_RULES_CHECKLIST.md) distingue reglas confirmadas y pendientes. La distribución de un pago entre varios préstamos se consultó al cobrador y está a la espera de respuesta; no bloquea la POC técnica de notificaciones autorizada en fase 1.
+
+## Asociación y registro propuestos — 2026-09-24
+
+El usuario propuso sugerir un cliente cuando el nombre del remitente Plin coincida con nombres importados, manteniendo siempre la obligación del cobrador de verificar. Los avisos sin coincidencia permanecerán en una lista pendiente. También se desea un asistente tipo chat para ingresar efectivo o pagos manuales usando nombre registrado o apodo y monto.
+
+Dirección técnica acordada: una bandeja única conserva tanto candidatos digitales sugeridos como no identificados. Durante la ruta, el asistente manual acepta entradas breves como `pablito1 20` y `juan mototaxi 150.50`; el último elemento es el monto, el texto anterior es la consulta de nombre o alias y no se exige `S/`. Cada entrada se guarda como borrador para que el cobrador continúe la ruta y revise todo después. Remitente, cliente deudor y préstamo permanecen separados. El pago manual se aplica inmediatamente después de que el cobrador confirma explícitamente cliente, préstamo, medio, moneda y monto; la confirmación queda deshabilitada si falta un dato o existe ambigüedad. La implementación transaccional de esa aplicación corresponde a la fase 2.
+
+Regla temporal para la POC de Excel: el directorio solo incluye filas con nombre y celda DNI no vacía. En el archivo de referencia esto deja 53 filas e ignora 3,856 filas que contienen nombre pero no DNI. Los valores presentes tienen entre uno y tres caracteres en la lectura cruda y ninguno tiene ocho dígitos; el filtro valida existencia, no autenticidad ni formato oficial. No usar esos valores como identidad estable ni afirmar que representan DNIs peruanos completos.

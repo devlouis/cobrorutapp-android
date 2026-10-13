@@ -1,6 +1,6 @@
 # Estado de trabajo
 
-Fecha: 2026-09-15. **Fase 0 completada; fase 1 en curso por encargo explícito.** POC debug implementada; primera captura real Plin confirmada por el usuario. Yape y escenarios restantes pendientes. Las entradas siguientes conservan el historial; consultar la actualización final para el estado vigente.
+Fecha: 2026-09-24. **Fase 0 completada; fase 1 en curso por encargo explícito.** POC debug de Plin validada y primer flujo integrado de campo implementado. Yape, persistencia productiva, aplicación real de pagos y reglas de Jornada continúan pendientes. Las entradas siguientes conservan el historial; consultar la actualización final para el estado vigente.
 
 ## Git y punto de partida
 
@@ -199,3 +199,143 @@ El commit será local y no se ejecutará push. Fase 1 continúa con Yape, format
 ## Secuencia acordada para notificaciones
 
 El usuario indicó continuar avanzando con pruebas y comprobaciones de Plin a medida que existan nuevos escenarios o formatos. La matriz ejecutada en Z2474 queda como línea base comprobada, sin considerar cerrada toda compatibilidad futura de Interbank. Las pruebas equivalentes de Yape se realizarán después y permanecen pendientes; los resultados de Plin no se trasladan por suposición a Yape. Solo actualización documental, sin cambios de código ni pruebas nuevas; no ejecutar push.
+
+## Discovery de asociación de pagos — 2026-09-24
+
+El usuario propuso tres flujos para la siguiente POC: sugerir cliente por coincidencia del nombre Plin manteniendo confirmación obligatoria; conservar sin coincidencia en una lista pendiente; y registrar efectivo/manual mediante un asistente tipo chat con nombre o apodo y monto.
+
+Se inspeccionó `2SJL17ABRIL26.xlsx` localmente y en modo lectura con el runtime de spreadsheets. `Plan1` tiene encabezados relevantes en `C:L`; se analizaron 4,062 filas dentro de ese rango sin imprimir nombres, DNI, direcciones ni montos. Resultado anonimizado: 3,909 filas con nombre, 2,047 nombres normalizados distintos, 696 grupos repetidos que abarcan 2,558 filas, máximo 22 filas para un mismo nombre normalizado y 53 filas con DNI. Hay fórmulas numerosas en saldo y abono. El archivo no se modificó ni se copió al repositorio.
+
+Conclusión: una coincidencia puede sugerir, nunca identificar automáticamente cliente o deuda. Se documentó una bandeja única de pendientes y un asistente determinista que crea borradores revisables en [PAYMENT_MATCHING_POC](PAYMENT_MATCHING_POC.md). No se implementó matcher, parser monetario, pantalla, Room ni escritura Excel en este paso de discovery. Siguiente tarea técnica propuesta: parser Plin y matcher puro con fixtures sintéticos; después UI debug e importación read-only. Sin commit ni push.
+
+## Parser Plin y matcher de nombres — 2026-09-24
+
+El usuario aprobó que un pago manual se aplique inmediatamente después de una confirmación explícita con cliente, préstamo, medio, moneda y monto. Si falta un dato o existe ambigüedad, la confirmación permanece deshabilitada. Se actualizó PRODUCT_CONTEXT, BUSINESS_RULES_CHECKLIST y PAYMENT_MATCHING_POC. La aplicación real al saldo continúa reservada para la transacción idempotente de fase 2; esta entrega no crea pagos ni modifica saldos.
+
+Implementado un modelo de dinero Kotlin/JVM con `Long` en unidades menores y moneda `PEN`. El matcher puro normaliza mayúsculas, tildes, puntuación y espacios solo para búsqueda; conserva el nombre mostrado y devuelve todos los candidatos del primer nivel con resultados: nombre exacto normalizado, alias confirmado exacto o los mismos términos completos en otro orden. No usa coincidencia aproximada, consultas parciales, monto, hora ni fila de Excel, y nunca selecciona automáticamente un cliente.
+
+Implementado en el source set debug de notificaciones un parser acotado al formato comprobado `PERSONA te ha plineado S/MONTO`, con dos decimales, cálculo entero de céntimos, moneda PEN y control de overflow. Revisa campos individuales de la notificación; acepta repeticiones idénticas y rechaza resultados conflictivos. Permanece desacoplado del listener, la persistencia y la UI hasta construir la bandeja debug. Formatos no observados quedan sin interpretar en vez de inferirse.
+
+Validación realizada:
+
+- `./gradlew :core:domain:test :integration:notifications:testDebugUnitTest --console=plain`: BUILD SUCCESSFUL. Matcher: 9 tests; parser: 6; filtro existente: 10. Total 25, cero fallos y errores.
+- `./gradlew :app:assembleDebug :app:assembleRelease lintDebug --console=plain`: BUILD SUCCESSFUL, 621 tareas. El reporte XML de lint contiene cero incidencias.
+- `git diff --check`: sin errores.
+
+No se ejecutaron pruebas conectadas porque parser y matcher son piezas puras sin integración al listener o UI. Siguiente tarea: conectar parser y matcher a un directorio sintético y mostrar una bandeja debug con cero, una o varias sugerencias. La importación read-only del directorio real, claves estables, UI manual, Room, aplicación de pagos, Yape y round-trip Excel continúan pendientes. Cambios locales sin commit ni push.
+
+## Captura manual rápida — 2026-09-24
+
+El usuario aclaró que el cobrador necesita registrar durante la ruta entradas breves como `pablito1 20` y `juan mototaxi 150.50`, sin escribir obligatoriamente un signo de moneda, para revisar los pagos al finalizar. Esto no contradice la aplicación inmediata del pago manual confirmado: enviar el comando solo guarda un borrador; la aplicación ocurre después de revisar y confirmar cliente, préstamo, medio, moneda y monto.
+
+Implementado en domain un parser determinista de comandos manuales. Interpreta el último elemento numérico como monto y todo el texto anterior como consulta de nombre o alias; admite soles enteros o uno/dos decimales, `S/` opcional, moneda PEN y conversión segura a céntimos `Long`. Rechaza consulta o monto ausentes, cero, negativos, coma decimal, más de dos decimales, símbolos no admitidos y overflow. El medio de pago se elegirá mediante el contexto de la pantalla para evitar escribirlo en cada comando.
+
+Validación: `./gradlew :core:domain:test :app:assembleDebug lintDebug --console=plain` terminó BUILD SUCCESSFUL. Domain ejecutó 15 tests —9 del matcher y 6 del parser manual— sin fallos ni errores; lint contiene cero incidencias. `git diff --check` y la revisión de espacios finales pasaron. No se implementó todavía la pantalla, persistencia de borradores ni aplicación a saldo. Siguiente tarea: integrar parser, matcher y directorio sintético en la UI debug con una cola de revisión posterior. Sin commit ni push.
+
+## Propuesta de UI del asistente — 2026-09-24
+
+El usuario pidió detallar, sin implementar todavía, una vista de asistente accesible mediante un FAB con icono de chat visible en Jornada, Cobranza e Ingresos, y usar Jetpack Navigation 3. Se inspeccionó la app: actualmente `CobroRutApp.kt` usa Navigation Compose 2.9.7, un `NavController`, `NavHost` y tres destinos raíz sin flujos hijos; las pantallas de feature continúan vacías.
+
+Se preparó [MANUAL_ASSISTANT_UI_PROPOSAL](MANUAL_ASSISTANT_UI_PROPOSAL.md) para revisión. Recomienda migración atómica a Navigation 3 1.2.0 estable, rutas `NavKey` tipadas, back stack por pestaña y `NavDisplay`; FAB global; captura rápida en pantalla completa; cola de borradores; revisión detallada; y diálogo final sin efecto financiero. La UI y ViewModel pertenecerán a `:feature:collection`; `:app` ensamblará navegación. La POC usará solo fixtures sintéticos y estado local, sin Room, Excel real, pagos ni saldos.
+
+Fuentes oficiales consultadas: documentación principal, guía de migración, receta de múltiples back stacks, guardado de estado y release notes de Navigation 3. La versión 1.2.0 figura estable desde el 23 de septiembre de 2026 y exige `compileSdk` 36 o superior; el proyecto usa 37. No se modificó código ni catálogo de dependencias en este paso. Pendiente aprobación de interacción a pantalla completa, efectivo predeterminado, badge, eliminación con confirmación y alcance efímero de la POC. Sin pruebas Android nuevas, commit ni push; `git diff --check` y la revisión de espacios finales pasaron.
+
+## Análisis del flujo integrado de campo — 2026-09-24
+
+El usuario amplió la POC: importar el Excel para obtener nombre, dirección, DNI, fecha, venta, total, valor de cuota, saldo, abono y número de cuota; mostrar Clientes desde un menú lateral; y usar el directorio con el asistente y detector de notificaciones para simular el flujo de campo. Solicitó análisis y observaciones, sin implementación todavía.
+
+Se reinspeccionó `Plan1!C1:M4062` read-only y sin imprimir datos personales. `No CUOTA` existe en M, con 4,005 valores no vacíos, 1,175 fórmulas y 133 valores textuales. `DIRECCION` existe en C, pero las 4,061 filas de datos están vacías en este archivo. `SALDO` tiene 1,189 fórmulas y `ABONO` 1,292. El archivo también contiene `SERVICIO`, con 213 valores no vacíos, aunque no fue incluido en la lista solicitada. Los conteos anteriores de nombres repetidos y DNI escaso se mantienen.
+
+Se documentó la propuesta completa en [FIELD_FLOW_POC_PROPOSAL](FIELD_FLOW_POC_PROPOSAL.md): `ModalNavigationDrawer` para Importar, Clientes y Configuración; tres pestañas intactas; importación mediante selector Android y validación previa; directorio lazy; filas importadas separadas de identidad de cliente/crédito; integración con matching manual y digital; y dos niveles de prueba. La POC read-only puede ser temporal, pero una simulación de ruta que deba sobrevivir cierre de proceso requiere una base Room mínima y entra en la fundación de fase 2.
+
+Observaciones principales: no agrupar automáticamente por nombre; leer DNI como texto formateado; conservar `SERVICIO` sin atribuirle semántica; tratar `ABONO` como dato importado que no genera ni reaplica un pago; conservar `No CUOTA` también como valor original; no evaluar fórmulas; y dejar actualización/exportación para el round-trip posterior. Sin cambios de código, dependencias, Excel ni datos reales versionados; sin pruebas Android nuevas, commit ni push. `git diff --check` y la revisión de espacios finales pasaron. Pendiente aprobación de las siete decisiones de alcance.
+
+## Filtro temporal por DNI — 2026-09-24
+
+El usuario definió que la POC solo importará usuarios con DNI. Se adopta como regla de elegibilidad por presencia: nombre no vacío y celda DNI no vacía. No se interpreta todavía como validación oficial de ocho dígitos ni como clave estable de cliente.
+
+La inspección read-only de `Plan1!D2:E4062` confirma 3,909 filas con nombre y solo 53 con nombre más DNI; 3,856 filas con nombre quedarían excluidas. Las 53 celdas son valores únicos en este archivo: 52 numéricas y una textual. Sus representaciones crudas tienen de uno a tres caracteres, ninguna tiene ocho dígitos y las celdas no reportan un formato numérico que complete ceros. Esto sugiere que pueden ser códigos u otro dato incompleto; la UI debe indicar `DNI presente — formato no validado` y no afirmar autenticidad.
+
+Se actualizó la propuesta integrada, PRODUCT_CONTEXT y BUSINESS_RULES_CHECKLIST. La vista previa de importación mostrará incluidos y excluidos; solo las 53 filas elegibles alimentarán Clientes y matching. No se modificó código ni Excel, no se imprimieron valores personales y no hubo pruebas Android, commit ni push. `git diff --check` y la revisión de espacios finales pasaron.
+
+## Aprobación de la POC y regla futura de jornada — 2026-09-24
+
+El usuario aprobó la propuesta integrada: Navigation 3, drawer, FAB, importación read-only, directorio filtrado por DNI presente, asistente y asociación de notificaciones. También indicó que las reglas detalladas de Jornada se trabajarán después.
+
+Quedaron confirmadas dos reglas de alto nivel para esa futura feature: cada día se debe importar el Excel antes de iniciar la jornada y, si no existe una importación aceptada, el inicio permanece bloqueado; al finalizar se debe exportar el archivo de cierre. Continúan pendientes validación de fecha/ruta, reemplazo o reimportación, jornadas activas, pendientes que bloquean cierre, fallo de exportación, nombre/destino, reapertura y reexportación.
+
+Se actualizaron FIELD_FLOW_POC_PROPOSAL, MANUAL_ASSISTANT_UI_PROPOSAL, PRODUCT_CONTEXT, BUSINESS_RULES_CHECKLIST y ROADMAP. No se inició la feature Jornada ni se implementaron bloqueos o exportación. Sin código, pruebas Android, commit ni push en este paso; `git diff --check` y la revisión de espacios finales pasaron.
+
+## Implementación del flujo integrado de campo — 2026-09-24
+
+Por encargo explícito se implementó la POC aprobada. La app usa Navigation 3 1.2.0 con rutas tipadas, tres back stacks independientes para Jornada/Cobranza/Ingresos, drawer para Importar archivo/Clientes/Configuración y un FAB global del asistente con contador de borradores pendientes. Los destinos secundarios ocultan barra inferior y FAB; volver conserva la pestaña de origen.
+
+La importación abre el selector Android, lee `Plan1` en segundo plano y presenta una vista previa antes de aceptar. El lector OOXML usa ZIP+SAX, no ejecuta macros, enlaces, fórmulas ni contenido activo, y aplica límites defensivos. Solo incluye filas con nombre y DNI presentes; conserva el valor crudo, convierte dinero válido a céntimos `Long` PEN y advierte DNI no validado, montos inválidos o fórmulas sin valor cacheado. La importación aceptada permanece únicamente en memoria para esta POC: no crea Room, jornada, pagos, saldo nuevo ni exportación.
+
+Clientes muestra una fila importada por operación, sin fusionar nombres o DNI. Oculta parcialmente el DNI, permite búsqueda por nombre/DNI/dirección, señala nombres repetidos y muestra fecha, saldo y número de cuota para distinguir filas. El detalle conserva dirección, fecha, venta, servicio opcional, total, cuota, saldo, abono importado y `No.CUOTA`.
+
+El asistente acepta comandos como `pablito1 20`, fija Efectivo/PEN, guarda un borrador y mantiene el foco para captura rápida. La cola exige selección humana de cliente/fila y deuda aun con una sola sugerencia; después muestra una confirmación explícita. La acción final se denomina `Validar simulación` y no altera saldos. Al aceptar un Excel, el matcher usa exclusivamente sus filas elegibles; sin importación se conservan fixtures sintéticos para probar la UI.
+
+Validaciones reales:
+
+- `./gradlew :app:assembleDebug lintDebug testDebugUnitTest :core:domain:test`: BUILD SUCCESSFUL, 379 tareas; lint sin errores.
+- Domain: 15 pruebas del matcher y parser manual; notificaciones: 16 pruebas incluyendo parser Plin y filtros; Excel: 5 pruebas sintéticas; collection: 6 pruebas del ViewModel manual. Cero fallos.
+- Smoke temporal contra `2SJL17ABRIL26.xlsx`: 53 filas incluidas y 3,856 excluidas sin DNI. El test temporal y la ruta personal se eliminaron; el archivo y sus datos no se versionaron.
+- `git diff --check`: sin errores.
+- APK debug instalada con `adb install -r` en Z2474; arranque COLD correcto. Se inspeccionaron visualmente Jornada, drawer, Importar archivo y Asistente. El comando manual `pablito1 20` creó un pendiente y mostró una coincidencia sugerida sin selección automática.
+
+El Excel de referencia se copió temporalmente a Descargas del Z2474 para continuar la prueba manual mediante el selector del sistema. La selección automatizada con toques ADB no produjo un URI utilizable, por lo que no se declara verificada la vista previa dentro del dispositivo; el mismo archivo sí pasó el lector real en el smoke test JVM. Siguiente tarea: seleccionar manualmente el XLSX en Z2474, aceptar la vista previa, revisar el directorio y probar cero/una/varias coincidencias con datos permitidos. Después corresponde diseñar persistencia e idempotencia antes de aplicar pagos o iniciar las reglas de Jornada. Sin commit ni push.
+
+## Corrección de importación XLSX en Android — 2026-09-25
+
+El usuario comprobó en Z2474 que la importación no mostraba progreso visible y terminaba con `No se pudo leer el archivo. Selecciona un XLSX válido` al elegir el archivo de referencia. Se reprodujo el fallo con una prueba instrumentada antes de modificar el lector. La causa no era el formato del archivo: Android rechazaba dos opciones de seguridad configuradas sobre `SAXParserFactory` y la excepción de compatibilidad quedaba clasificada como XLSX inválido.
+
+Se adaptó el lector OOXML al parser SAX de Android. Las entidades externas generales y parametrizadas se desactivan en el `XMLReader`, se conserva el `EntityResolver` vacío y se rechaza `DOCTYPE` antes del parseo para mantener el límite de seguridad sin depender de opciones que Android no reconoce. Los errores ahora distinguen archivo inaccesible, XLSX inválido y fallo interno de lectura, con mensajes específicos en la UI.
+
+La pantalla de importación muestra una tarjeta de progreso con indicador circular, barra indeterminada y el texto `Leyendo y validando el archivo…`. El ViewModel conserva ese estado al menos 700 ms para que una lectura rápida también produzca respuesta visual y cancela una importación anterior si se elige otro archivo.
+
+Validaciones realizadas:
+
+- La prueba instrumentada de regresión falló en Z2474 antes de la corrección y pasó después.
+- `ANDROID_SERIAL=LZA56PPEYDC009239 ./gradlew :integration:excel:connectedDebugAndroidTest`: BUILD SUCCESSFUL, una prueba Android permanente sin fallos.
+- Prueba temporal Android contra el archivo real ubicado en Descargas del Z2474: importación exitosa, 53 filas incluidas y 3,856 excluidas por ausencia de DNI. No se imprimieron datos de filas. La prueba temporal se eliminó y no se versionaron el archivo ni su ruta.
+- `./gradlew :integration:excel:testDebugUnitTest :app:compileDebugKotlin`: BUILD SUCCESSFUL.
+- `./gradlew :app:assembleDebug lintDebug testDebugUnitTest :core:domain:test`: BUILD SUCCESSFUL, 379 tareas; lint sin errores y tests sin fallos.
+- APK corregida instalada en Z2474 y arranque COLD correcto.
+- `git diff --check`: sin errores.
+
+Siguiente comprobación manual: abrir Menú → Importar archivo en Z2474, seleccionar el XLSX, observar el progreso y confirmar que aparece la vista previa con 53 incluidos y 3,856 excluidos. Cambios locales sin commit ni push.
+
+## Análisis de mensajería + IA + Supabase — 2026-10-13
+
+Se revisó la propuesta de recordatorios de cobranza, recepción de vouchers, clasificación Gemini, sincronización Supabase y asistente de respuestas. Se documentó la arquitectura y contratos propuestos en [WHATSAPP_AI_SUPABASE_ANALYSIS](WHATSAPP_AI_SUPABASE_ANALYSIS.md), sin implementar código ni crear recursos remotos.
+
+Hallazgo bloqueante: la política vigente de WhatsApp Business incluye expresamente `payday loans`, préstamos entre pares y `debt collection` entre los usos prohibidos, con independencia de licencias locales. Una plantilla Utility aprobada no autoriza ese uso. La arquitectura queda planteada con proveedor intercambiable y un `policy gate`; WhatsApp debe permanecer deshabilitado para recordatorios, negociación y cobranza.
+
+El análisis también confirma prerrequisitos aún ausentes: Room y aplicación idempotente de pagos, identidad estable a través de importaciones, teléfonos verificados, consentimiento por canal/finalidad, política de reimportación/exportación y sincronización outbox/inbox. El directorio efímero y el campo rotulado DNI de la POC no bastan para asociar conversaciones o deudas.
+
+Se definieron estados separados para conversación, evidencia, revisión, pago y entrega; schemas JSON para texto y voucher; contrato incremental Android/Room; manejo de la carrera de pago offline antes del lote vespertino; worker durable; y límites/costos. Gemini Free se descarta para datos reales porque sus términos indican no enviar información personal, sensible o confidencial. Vouchers e intenciones siempre requieren revisión humana y no modifican saldo.
+
+Siguiente decisión: escoger un canal permitido y validar marco contractual/legal. Antes de cualquier integración remota, continuar con fase 2 local durable e identidad/reimportación/exportación. Solo análisis y documentación; sin compilación, pruebas Android, commit ni push.
+
+### Blindaje de plantillas — 2026-10-13
+
+Se aclaró que la aprobación de una plantilla no autoriza una finalidad prohibida ni garantiza que Meta no la pause posteriormente. El análisis incorpora un `ChannelPolicyGate` cerrado por defecto, registro versionado de plantillas, variables tipadas, consentimiento por finalidad, control de destinatario, revisión previa, límites de frecuencia, canary y `kill switch`. WhatsApp para cobranza permanece bloqueado hasta obtener de Meta o un BSP una determinación escrita de elegibilidad sobre el modelo operativo completo; no se recomienda disfrazar recordatorios de mora como mensajes Utility.
+
+## Análisis de comprobantes compartidos — 2026-10-13
+
+Se analizó recibir manualmente una captura desde WhatsApp u otra aplicación mediante Android Sharesheet. La propuesta se documentó en [SHARED_VOUCHER_POC](SHARED_VOUCHER_POC.md). Este mecanismo no lee chats, controla WhatsApp ni requiere Business API: el cobrador elige `Compartir` y CobroRutApp recibe temporalmente una imagen.
+
+La primera POC debe usar OCR local y parsers deterministas por formato; Gemini Vision pagado queda como fallback solo si una comparación medida demuestra mejora. La imagen crea evidencia `EN_REVISION`, nunca un ingreso confirmado. Remitente y deudor siguen separados; nombre y monto solo generan candidatos que el cobrador debe seleccionar junto con el préstamo. Se debe vincular una captura con una posible notificación Plin o entrada manual sin duplicar abonos.
+
+Antes de implementar: obtener capturas Yape/Plin anonimizadas y autorizadas fuera de Git, validar campos realmente visibles, definir retención y acordar si la POC será efímera o esperará Room. Solo análisis y documentación; sin dependencias, manifiesto, compilación, pruebas Android, commit ni push.
+
+## Publicación de cambios — 2026-10-13
+
+Por encargo explícito del usuario ("subamos nuestro cambios"), se preparó y ejecutó el commit y push de las entregas acumuladas (POC de flujo integrado de campo, matcher/parser de pagos, asistente manual, lectura XLSX corregida en Android y análisis de integraciones).
+
+Validaciones de la entrega:
+- `./gradlew :app:assembleDebug lintDebug testDebugUnitTest :core:domain:test --console=plain`: BUILD SUCCESSFUL; 44 tests JVM sin fallos (15 domain, 16 notifications, 6 excel, 6 collection, 1 app).
+- `./gradlew :app:connectedDebugAndroidTest :integration:excel:connectedDebugAndroidTest`: BUILD SUCCESSFUL en `emulator-5554` (2 tests Android aprobados).
+- `git diff --check`: sin errores de whitespace.
+- Ignoradas carpetas locales `/output/` y `/tmp/` en `.gitignore`.

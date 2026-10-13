@@ -29,12 +29,19 @@ Este documento separa las reglas ya confirmadas de las definiciones pendientes. 
 
 - [x] El remitente del pago y el cliente deudor se identifican por separado; pueden ser la misma persona o un tercero que paga por el cliente.
 - [x] Una coincidencia de nombre solo genera una sugerencia. El cobrador siempre confirma cliente, deuda y monto, incluso cuando existe una sola coincidencia.
+- [x] Un ingreso Plin sin coincidencia permanece visible en una bandeja pendiente para asignación o verificación posterior.
+- [x] Un ingreso Plin con sugerencia también permanece pendiente hasta la revisión humana; sugerir no equivale a asignar ni confirmar.
+- [x] Un pago manual se aplica inmediatamente después de una confirmación explícita que muestra cliente, préstamo, medio, moneda y monto. Si falta un dato o existe ambigüedad, no se puede confirmar.
+- [x] Durante la ruta, el asistente acepta una captura breve `nombre o alias + monto`, sin exigir `S/`, y la guarda como borrador para revisión posterior. Capturar el texto no equivale a confirmar ni aplicar el pago.
 - [x] Un ingreso pendiente no modifica el saldo.
 - [x] Los pendientes persisten al cerrar la app y al cambiar de día.
 - [x] La confirmación del pago y su aplicación a la deuda deben ser idempotentes y ocurrir en una misma transacción.
 - [x] Las correcciones de pagos confirmados conservan el historial y el motivo.
 - [ ] Definir el flujo exacto de reversos y correcciones.
 - [ ] Definir qué ocurre con los pendientes al cerrar una jornada.
+- [ ] Definir claves estables de cliente y deuda para asociar sugerencias entre importaciones.
+- [ ] Definir cómo se crean, corrigen y desambiguan alias o apodos.
+- [ ] Definir el flujo de efectivo o pago manual entregado por un tercero.
 
 ## Duplicados y evidencias
 
@@ -50,6 +57,7 @@ Este documento separa las reglas ya confirmadas de las definiciones pendientes. 
 
 - [x] El saldo importado es la base y solo se descuentan los nuevos abonos; el historial no se descuenta nuevamente.
 - [x] El dinero se representa en céntimos con `Long` y moneda explícita, nunca con `Double`.
+- [x] Para la POC, solo se importan filas con nombre y una celda DNI no vacía. Es un filtro temporal de presencia, no una validación de DNI peruano ni una identidad estable.
 - [x] C y N son marcas equivalentes: la cuota del día no fue pagada.
 - [x] Al importar y exportar se conserva la representación original de C o N mientras no exista otra política acordada.
 - [x] A significa adelanto; esta marca todavía no determina cómo distribuir el importe entre cuotas.
@@ -63,5 +71,14 @@ Este documento separa las reglas ya confirmadas de las definiciones pendientes. 
 ## Jornada, gastos y recuperación
 
 - [x] El cobrador confirma sus cobros; el supervisor no aprueba pagos dentro de la app.
+- [x] Cada jornada requiere importar el archivo Excel correspondiente antes de iniciarse; sin una importación aceptada, la jornada no puede comenzar.
+- [x] Al terminar la jornada se debe exportar el archivo de cierre.
+- [ ] Definir cómo comprobar que el archivo corresponde a la fecha/ruta de la jornada.
+- [ ] Definir si puede existir más de una jornada activa y qué ocurre al cambiar de día.
+- [ ] Definir cómo corregir o reemplazar una importación equivocada sin perder ni duplicar pagos.
+- [ ] Definir si pendientes manuales o digitales bloquean el cierre.
+- [ ] Definir qué ocurre si la exportación falla o el destino deja de estar disponible; no marcar una jornada como cerrada sin una salida recuperable.
+- [ ] Definir nombre, ubicación, versión y mecanismo de entrega del archivo exportado.
+- [ ] Definir reapertura, anulación y reexportación de una jornada cerrada.
 - [ ] Definir las reglas de gastos y caja para el cierre de jornada.
 - [ ] Definir la recuperación y el respaldo de la información local.

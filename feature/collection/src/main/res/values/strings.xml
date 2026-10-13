@@ -1,4 +1,64 @@
 <resources>
     <string name="collection_empty_title">Sin clientes cargados</string>
     <string name="collection_empty_description">Los clientes y sus deudas aparecerán al importar una jornada. Aún no se pueden registrar cobros ni gastos.</string>
+    <string name="action_back">Atrás</string>
+    <string name="action_cancel">Cancelar</string>
+
+    <string name="manual_assistant_title">Asistente de pagos</string>
+    <string name="manual_assistant_instructions">Escribe el nombre o apodo y el monto. No necesitas escribir el signo de moneda.</string>
+    <string name="manual_assistant_examples">Ejemplos: “pablito1 20” o “juan mototaxi 150.50”</string>
+    <string name="manual_assistant_cash_method">Medio: Efectivo</string>
+    <string name="manual_assistant_input_label">Cliente y monto</string>
+    <string name="manual_assistant_input_placeholder">pablito1 20</string>
+    <string name="manual_assistant_save">Guardar para revisar</string>
+    <string name="manual_assistant_review_pending">Revisar pendientes (%1$d)</string>
+    <string name="manual_assistant_invalid">Escribe un nombre seguido de un monto mayor que cero.</string>
+    <string name="manual_assistant_saved_no_match">Guardado. No encontramos una coincidencia; deberás asignarlo al revisar.</string>
+    <string name="manual_assistant_saved_one_match">Guardado con una coincidencia sugerida. Debes confirmarla al revisar.</string>
+    <string name="manual_assistant_saved_multiple_matches">Guardado con %1$d coincidencias. Elige una al revisar.</string>
+
+    <string name="manual_queue_title">Pagos por revisar</string>
+    <string name="manual_queue_empty">Todavía no hay pagos manuales guardados.</string>
+    <string name="manual_queue_no_candidates">Sin coincidencias</string>
+    <string name="manual_queue_one_candidate">1 coincidencia sugerida</string>
+    <string name="manual_queue_many_candidates">%1$d coincidencias sugeridas</string>
+    <string name="manual_queue_pending">Pendiente de revisión</string>
+    <string name="manual_queue_validated">Validado en simulación</string>
+    <string name="manual_queue_review">Revisar</string>
+
+    <string name="manual_review_title">Revisar pago</string>
+    <string name="manual_review_not_found">No encontramos este borrador.</string>
+    <string name="manual_review_choose_customer">Confirma el cliente</string>
+    <string name="manual_review_no_match_help">No hay coincidencias sugeridas. Selecciona manualmente un cliente del directorio sintético.</string>
+    <string name="manual_review_suggested_customer">%1$s · sugerencia</string>
+    <string name="manual_review_choose_debt">Selecciona el préstamo</string>
+    <string name="manual_review_confirm">Revisar y confirmar</string>
+    <string name="manual_review_already_validated">Validado en simulación</string>
+    <string name="manual_confirmation_title">Confirmar pago manual</string>
+    <string name="manual_confirmation_customer">Cliente: %1$s</string>
+    <string name="manual_confirmation_debt">Préstamo: %1$s</string>
+    <string name="manual_confirmation_method">Medio: Efectivo</string>
+    <string name="manual_confirmation_currency">Moneda: PEN</string>
+    <string name="manual_confirmation_amount">Monto: %1$s</string>
+    <string name="manual_confirmation_simulation_warning">Esta prueba no modifica saldos ni registra un pago real.</string>
+    <string name="manual_confirmation_apply">Validar simulación</string>
+
+    <string name="imported_clients_title">Directorio importado</string>
+    <string name="imported_clients_summary">%1$d importados · %2$d excluidos sin DNI</string>
+    <string name="imported_clients_search">Buscar por nombre, alias o DNI</string>
+    <string name="imported_clients_empty">No hay clientes que coincidan con la búsqueda.</string>
+    <string name="imported_client_dni">DNI: %1$s</string>
+    <string name="imported_client_credit_count">%1$d créditos o filas importadas</string>
+    <string name="imported_client_repeated_name">Nombre repetido en %1$d filas importadas</string>
+    <string name="imported_client_credit_summary">Fecha: %1$s · Saldo: %2$s · Cuota: %3$s</string>
+    <string name="imported_client_detail_title">Detalle del cliente</string>
+    <string name="imported_client_not_found">No encontramos este cliente.</string>
+    <string name="imported_credit_title">Crédito · cuota %1$s</string>
+    <string name="imported_credit_date">Fecha</string>
+    <string name="imported_credit_sale">Venta</string>
+    <string name="imported_credit_service">Servicio</string>
+    <string name="imported_credit_total">Total</string>
+    <string name="imported_credit_installment">Valor cuota</string>
+    <string name="imported_credit_balance">Saldo importado</string>
+    <string name="imported_credit_payment">Abono importado</string>
 </resources>

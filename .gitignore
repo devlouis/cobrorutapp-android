@@ -66,6 +66,8 @@ secrets.properties
 *.tsv
 /private-data/
 /evidence/
+/output/
+/tmp/
 # Only explicitly reviewed, synthetic fixtures may be tracked here.
 !test-fixtures/synthetic/**/*.xlsx
 !test-fixtures/synthetic/**/*.csv

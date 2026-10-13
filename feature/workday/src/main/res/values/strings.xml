@@ -1,4 +1,22 @@
 <resources>
     <string name="workday_empty_title">Sin jornada iniciada</string>
     <string name="workday_empty_description">Aquí podrás importar la ruta del día, revisar el cierre y exportar el Excel. Estas funciones todavía no están disponibles.</string>
+    <string name="import_excel_title">Importar archivo</string>
+    <string name="import_excel_description">Selecciona el Excel de la ruta para validar sus datos antes de construir el directorio de prueba.</string>
+    <string name="choose_excel_file">Seleccionar archivo .xlsx</string>
+    <string name="choose_another_file">Elegir otro archivo</string>
+    <string name="reading_excel_file">Leyendo y validando el archivo…</string>
+    <string name="reading_excel_wait">Espera un momento. No cierres esta pantalla.</string>
+    <string name="import_for_test">Importar para prueba</string>
+    <string name="import_test_ready">Directorio de prueba disponible. No se modificaron saldos ni el archivo original.</string>
+    <string name="open_imported_directory">Abrir directorio importado</string>
+    <string name="import_excel_generic_error">No se pudo validar el archivo seleccionado.</string>
+    <string name="import_sheet_value">Hoja: %1$s</string>
+    <string name="import_scanned_rows">Filas analizadas: %1$d</string>
+    <string name="import_eligible_rows">Se importarán: %1$d</string>
+    <string name="import_excluded_rows">Excluidas sin DNI: %1$d</string>
+    <string name="import_warning_count">Advertencias: %1$d</string>
+    <string name="import_filter_title">Filtro temporal: DNI presente</string>
+    <string name="import_filter_description">Solo se incluirán filas con nombre y una celda DNI no vacía. El formato del DNI todavía no se valida.</string>
+    <string name="import_read_only_notice">Esta prueba es de solo lectura: no actualiza, exporta ni reemplaza el Excel.</string>
 </resources>

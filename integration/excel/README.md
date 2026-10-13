@@ -1,5 +1,7 @@
 # excel
 
-Esqueleto compilable de fase 0. Sin servicio, permisos, parser ni biblioteca. La fase 1 debe validar lectura y escritura del Excel real, conservando contenido y formato, antes de elegir biblioteca XLSX.
+POC de fase 1 para lectura local de `Plan1`. Usa directamente el contenedor OOXML con APIs Java compatibles con Android, sin una biblioteca XLSX adicional. Lee cadenas compartidas, cadenas inline y valores cacheados de fórmulas; no evalúa fórmulas ni modifica el archivo.
 
-Solo puede depender de domain. La app ensamblará los contratos mediante DI; data no dependerá de este módulo.
+Solo incluye filas con `NOMBRE` y `DNI` presentes. Conserva fecha, servicio y número de cuota como valores crudos, y representa importes válidos en céntimos PEN. Los DNI con formato distinto a ocho dígitos se incluyen con una advertencia porque esta fase valida presencia, no autenticidad.
+
+El módulo depende solo de domain. La app ensamblará el contrato y la UI suministrará un `WorkbookSource`; data no depende de esta integración. Persistencia Room, reimportación y exportación continúan fuera de esta POC.

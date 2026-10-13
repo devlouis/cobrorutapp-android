@@ -7,4 +7,16 @@
     <string name="theme_light">Tema: claro</string>
     <string name="theme_dark">Tema: oscuro</string>
     <string name="preferences_error">No se pudo acceder a las preferencias. Vuelve a abrir la app para reintentar.</string>
+    <string name="open_navigation_menu">Abrir menú</string>
+    <string name="navigate_back">Volver</string>
+    <string name="open_manual_assistant">Abrir asistente de pagos</string>
+    <string name="drawer_import_excel">Importar archivo</string>
+    <string name="drawer_customers">Clientes</string>
+    <string name="drawer_settings">Configuración</string>
+    <string name="manual_assistant_title">Asistente de pagos</string>
+    <string name="import_placeholder_description">La pantalla de importación se conectará en la siguiente integración.</string>
+    <string name="customers_placeholder_description">El directorio aparecerá aquí después de importar un archivo.</string>
+    <string name="settings_placeholder_description">Las opciones adicionales se agregarán aquí.</string>
+    <string name="manual_assistant_placeholder_description">La captura rápida de pagos se conectará en la siguiente integración.</string>
+    <string name="settings_theme_description">Elige cómo se muestra la aplicación.</string>
 </resources>

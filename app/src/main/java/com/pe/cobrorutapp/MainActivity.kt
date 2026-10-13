@@ -12,17 +12,21 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pe.cobrorutapp.core.designsystem.theme.CobrorutappTheme
 import com.pe.cobrorutapp.core.domain.preferences.ThemeMode
+import com.pe.cobrorutapp.feature.collection.manual.ManualAssistantViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: AppViewModel by viewModels()
+    private val fieldFlowViewModel: FieldFlowViewModel by viewModels()
+    private val manualAssistantViewModel: ManualAssistantViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             val state by viewModel.uiState.collectAsStateWithLifecycle()
+            val fieldFlowState by fieldFlowViewModel.uiState.collectAsStateWithLifecycle()
             val darkTheme = when (state.themeMode) {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
                 ThemeMode.LIGHT -> false
@@ -35,7 +39,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
             CobrorutappTheme(darkTheme = darkTheme) {
-                CobroRutApp(state = state, onCycleTheme = viewModel::cycleTheme)
+                CobroRutApp(
+                    state = state,
+                    fieldFlowState = fieldFlowState,
+                    manualAssistantViewModel = manualAssistantViewModel,
+                    onWorkbookSelected = fieldFlowViewModel::selectWorkbook,
+                    onConfirmImport = fieldFlowViewModel::confirmImport,
+                    onCustomerQueryChanged = fieldFlowViewModel::updateCustomerQuery,
+                    onCycleTheme = viewModel::cycleTheme,
+                )
             }
         }
     }
